@@ -9,3 +9,4 @@ demo/*
 .idea/
 
 .DS_Store
+.venv
