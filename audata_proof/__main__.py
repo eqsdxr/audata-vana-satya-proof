@@ -9,7 +9,11 @@ from typing import Dict, Any
 from audata_proof.proof import Proof
 from audata_proof.db import Database
 
-INPUT_DIR, OUTPUT_DIR, SEALED_DIR = "/app/demo/input", "/app/demo/output", "/app/demo/sealed"
+INPUT_DIR, OUTPUT_DIR, SEALED_DIR = (
+    "/app/demo/input",
+    "/app/demo/output",
+    "/app/demo/sealed",
+)
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 
