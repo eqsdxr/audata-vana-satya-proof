@@ -1,4 +1,3 @@
-import datetime
 from uuid import uuid4
 
 from sqlalchemy import (
@@ -7,16 +6,22 @@ from sqlalchemy import (
     Integer,
     UUID,
     DateTime,
+    Text,
+    func,
 )
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
 
-class User(Base):
+class Users(Base):
     __tablename__ = "users"
 
     id = Column(UUID, default=uuid4(), primary_key=True)
-    authenticity_count = Column(Integer, default=0)
-    is_banned = Column(Boolean)
-    created_at = Column(DateTime, default=datetime.datetime.now(datetime.UTC))
+    # Count failed authenticity checks to ban users who exceed limit
+    failed_authenticity_count = Column(Integer, default=0)
+    is_banned = Column(Boolean, default=False)
+    # Use server-side timestamp to ensure consistency across time zones and avoid app-server clock drift
+    uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
