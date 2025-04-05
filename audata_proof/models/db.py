@@ -3,9 +3,11 @@ from uuid import uuid4
 from sqlalchemy import (
     Boolean,
     Column,
+    Float,
     Integer,
     UUID,
     DateTime,
+    String,
     Text,
     func,
 )
@@ -29,6 +31,10 @@ class Contributions(Base):
     __tablename__ = "contributions"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    fingerprint = Column(Text, unique=True, nullable=False)
+    fingerprint = Column(Text, nullable=False)
+    # Store hash too for fast uniquness lookups
+    fingerprint_hash = Column(String(32), unique=True, nullable=False) # 32 chars for md5
     file_link = Column(Text, unique=True, nullable=False)
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+    # Store duration for accurate fingerprint comparisons
+    duration = Column(Float, nullable=False, default=30.0)
