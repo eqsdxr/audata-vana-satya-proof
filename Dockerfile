@@ -1,15 +1,18 @@
-FROM python:3.12-slim
-
-# Install any Python dependencies your application needs, e.g.:
-RUN pip install --no-cache-dir requests
-
-RUN mkdir /sealed && chmod 777 /sealed
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
 WORKDIR /app
 
-COPY . /app
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy PATH=".venv/bin:$PATH"
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY uv.lock pyproject.toml /app/
 
-CMD ["python", "-m", "my_proof"]
+RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-install-project --no-dev
+
+COPY . /app/
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen
+
+RUN mkdir -p /sealed && chmod 777 /sealed
+
+CMD [".venv/bin/python3", "-m", "audata_proof"]
