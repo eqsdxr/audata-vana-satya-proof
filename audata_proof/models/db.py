@@ -25,3 +25,10 @@ class Users(Base):
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
+class Contributions(Base):
+    __tablename__ = "contributions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    fingerprint = Column(Text, unique=True, nullable=False)
+    file_link = Column(Text, unique=True, nullable=False)
+    uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
