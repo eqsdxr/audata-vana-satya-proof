@@ -5,7 +5,7 @@ from typing import Dict, Any
 
 import requests
 
-from my_proof.models.proof_response import ProofResponse
+from audata_proof.models.proof_response import ProofResponse
 
 
 class Proof:
@@ -50,9 +50,12 @@ class Proof:
 
         # Calculate overall score and validity
         self.proof_response.score = (
-            0.6 * self.proof_response.quality + 0.4 * self.proof_response.ownership
+            0.6 * self.proof_response.quality
+            + 0.4 * self.proof_response.ownership
         )
-        self.proof_response.valid = email_matches and total_score >= score_threshold
+        self.proof_response.valid = (
+            email_matches and total_score >= score_threshold
+        )
 
         # Additional (public) properties to include in the proof about the data
         self.proof_response.attributes = {
@@ -77,5 +80,7 @@ def fetch_random_number() -> float:
         )
         return float(response.text.strip())
     except requests.RequestException as e:
-        logging.warning(f"Error fetching random number: {e}. Using local random.")
+        logging.warning(
+            f"Error fetching random number: {e}. Using local random."
+        )
         return __import__("random").random()

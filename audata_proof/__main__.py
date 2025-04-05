@@ -28,7 +28,9 @@ def load_config() -> Dict[str, Any]:
 def run() -> None:
     """Generate proofs for all input files."""
     config = load_config()
-    input_files_exist = os.path.isdir(INPUT_DIR) and bool(os.listdir(INPUT_DIR))
+    input_files_exist = os.path.isdir(INPUT_DIR) and bool(
+        os.listdir(INPUT_DIR)
+    )
 
     if not input_files_exist:
         raise FileNotFoundError(f"No input files found in {INPUT_DIR}")
