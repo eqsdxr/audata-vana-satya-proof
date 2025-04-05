@@ -6,9 +6,10 @@ import traceback
 import zipfile
 from typing import Dict, Any
 
-from my_proof.proof import Proof
+from audata_proof.proof import Proof
+from audata_proof.db import Database
 
-INPUT_DIR, OUTPUT_DIR, SEALED_DIR = "/input", "/output", "/sealed"
+INPUT_DIR, OUTPUT_DIR, SEALED_DIR = "/app/demo/input", "/app/demo/output", "/app/demo/sealed"
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 
@@ -41,7 +42,7 @@ def run() -> None:
 
     output_path = os.path.join(OUTPUT_DIR, "results.json")
     with open(output_path, "w") as f:
-        json.dump(proof_response.dict(), f, indent=2)
+        json.dump(proof_response.model_dump(), f, indent=2)
     logging.info(f"Proof generation complete: {proof_response}")
 
 

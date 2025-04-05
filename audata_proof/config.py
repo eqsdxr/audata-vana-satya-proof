@@ -16,7 +16,7 @@ logger.add(
 
 # Configure settings
 class Settings(BaseSettings):
-    ENV: Literal["local", "staging", "production"]
+    ENV_: Literal["local", "staging", "production"]
 
     DB_HOST_LOCAL: str = "localhost"
     DB_HOST_STAGING: str = "staging-db-host"
@@ -38,7 +38,7 @@ class Settings(BaseSettings):
 
     @property
     def db_config(self) -> dict:
-        env_key = self.ENV.upper()
+        env_key = self.ENV_.upper()
 
         return {
             # Use getattr in order to keep code clean
@@ -50,14 +50,14 @@ class Settings(BaseSettings):
 
     @property
     def DB_URI(self) -> str:
-        env = self.ENV.upper()
+        env = self.ENV_.upper()
         user = getattr(self, f"DB_USER_{env}")
         password = getattr(self, f"DB_PASSWORD_{env}")
         host = getattr(self, f"DB_HOST_{env}")
         port = self.DB_PORT
         db = getattr(self, f"DB_NAME_{env}")
 
-        return f"postgresql://{user}:{password}@{host}:{port}/{db}"
+        return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}"
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", case_sensitive=True
