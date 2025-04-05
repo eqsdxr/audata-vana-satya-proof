@@ -30,4 +30,4 @@ fs.mounts = [
 # Gramine documentation for more details: https://gramine.readthedocs.io. Note
 # that gsc defines a number of manifest settings by default.
 
-loader.entrypoint = { path = "/my_proof/__main__.py" }
+loader.entrypoint = { path = "/audata_proof/__main__.py" }

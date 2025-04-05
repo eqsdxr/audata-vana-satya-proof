@@ -64,14 +64,14 @@ If you want to use a language other than Python, you can modify the Dockerfile t
 To run the proof locally, without Gramine, you can use Docker:
 
 ```
-docker build -t my-proof .
+docker build -t audata-proof .
 docker run \
 --rm \
 --volume $(pwd)/demo/sealed:/sealed \
 --volume $(pwd)/demo/input:/input \
 --volume $(pwd)/demo/output:/output \
 --env USER_EMAIL=user123@gmail.com \
-my-proof
+audata-proof
 ```
 
 ## Building and Releasing
