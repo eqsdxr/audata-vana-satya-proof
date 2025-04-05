@@ -4,10 +4,10 @@ __pycache__/
 *.pyc
 
 demo/*
-!demo/input/
 
 .idea/
 
 .DS_Store
 .venv
 .env
+fpcalc
