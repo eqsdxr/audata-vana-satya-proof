@@ -13,6 +13,7 @@ class Proof:
         self.proof_response = ProofResponse(dlp_id=settings.DLP_ID)
 
     def generate(self) -> ProofResponse:
+        """Generate proof"""
         logger.info('Starting proof generation')
 
         input_file_path: str = os.path.join(

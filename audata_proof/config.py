@@ -5,7 +5,7 @@ from typing import Literal
 from loguru import logger
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Configure logging
+# Single global logger configuration, import it from this file whenever needed
 logger.add(
     stderr,
     colorize=True,
@@ -13,9 +13,21 @@ logger.add(
 )
 
 
-# Configure settings
 class Settings(BaseSettings):
+    """
+    Global settings class.
+
+    Fields with default values are overriden with values
+    from .env, fields without default values are mandatory.
+    """
+
+    # Terms explanation:
+    # "staging" term is equivalent to "testnet"
+    # "production" term is equivalent to "mainnet"
     ENV_: Literal['local', 'staging', 'production']
+
+    # Parameters from initial config
+    # TODO Needs clarifying
 
     DLP_ID: int = 1234
     USE_SEALING: str = '/app/demo/sealed'
@@ -47,6 +59,7 @@ class Settings(BaseSettings):
     def DB_URI(self) -> str:
         env = self.ENV_.upper()
 
+        # Avoid dublicating code by using geattr
         user = getattr(self, f'DB_USER_{env}')
         password = getattr(self, f'DB_PASSWORD_{env}')
         host = getattr(self, f'DB_HOST_{env}')
@@ -57,7 +70,10 @@ class Settings(BaseSettings):
 
     # Settings class configuration
     model_config = SettingsConfigDict(
-        env_file='.env', env_file_encoding='utf-8', case_sensitive=True
+        # Env file should be in the same dir from where the app is executed
+        env_file='.env',
+        env_file_encoding='utf-8',
+        case_sensitive=True,
     )
 
 
@@ -66,4 +82,5 @@ def get_settings():
     return Settings()  # type: ignore # Suppress useless warning
 
 
+# Global settings object
 settings = get_settings()

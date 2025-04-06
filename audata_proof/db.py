@@ -38,7 +38,9 @@ class Database:
             session.commit()
         except Exception as e:
             session.rollback()
-            logger.error(f'{e}')
+            logger.error(
+                f'Exception while working with a database session: {e}'
+            )
             raise e
         finally:
             session.close()

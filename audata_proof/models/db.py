@@ -40,8 +40,8 @@ class Contributions(Base):
     fingerprint_hash = Column(
         String(32), unique=True, nullable=False
     )  # 32 chars for md5
-    # Again, we don't use "unique=True" here because if the link
-    # is too long it's better to use hash instead
+    # Again, "unique=True" is not used here because if links
+    # are too long so it's better to use hash instead
     file_link = Column(Text, nullable=False)
     file_link_hash = Column(
         String(32), unique=True, nullable=False
