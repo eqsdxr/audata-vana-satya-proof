@@ -84,7 +84,7 @@ def check_uniqueness(
                 'Exact fingerprint match found:\n'
                 f'Current fingerprint: {current_fprint}\n'
                 f'Hash of current fingerprint: {current_fprint_hash}\n'
-                f'Fingerprint in DB: {duplicate.fingerprint}\n'
+                f'Fingerprint in DB: {decode_db_fingerprint(str(duplicate.fingerprint))}\n'
                 f'Hash of fingerprint in DB: {duplicate.fingerprint_hash}'
             )
             raise FingerprintAlreadyExists(f'Hash: {current_fprint_hash}')
