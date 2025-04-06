@@ -1,6 +1,9 @@
 import os
 
+from sqlalchemy.exc import MultipleResultsFound
+
 from audata_proof import exc, handlers
+from audata_proof.db import db
 from audata_proof.config import logger, settings
 from audata_proof.models.proof_response import ProofResponse
 
@@ -16,25 +19,32 @@ class Proof:
             settings.INPUT_DIR, os.listdir(settings.INPUT_DIR)[3]
         )
 
+        # Init db session
+        db.init()
+
         # Calculate proof-of-contribution scores: https://docs.vana.org/vana/core-concepts/key-elements/proof-of-contribution/example-implementation
         self.proof_response.ownership = 0
         self.proof_response.quality = 0
         self.proof_response.authenticity = 0  # How authentic is the data is (ie: not tampered with)? (Not implemented here)
 
+        # Check uniqueness
         try:
-            handlers.check_uniqueness(input_file_path)
+            handlers.check_uniqueness(input_file_path, db)
             self.proof_response.uniqueness = 1
-        # Keep them separate to add different logic in future
+        # Keep them separate in order to add different logic in future
         except exc.FingerprintAlreadyExists as e:
             logger.error(e)
-            self.proof_response.uniqueness = 0
         except exc.TooSimilarFingerprintAlreadyExists as e:
             logger.error(e)
-            self.proof_response.uniqueness = 0
+        except MultipleResultsFound as e:
+            logger.error(e)
+        except Exception as e:
+            logger.error(e)
 
         # Calculate overall score and validity
         self.proof_response.score = 0
 
+        # Assign validity
         self.proof_response.valid = (
             self.proof_response.ownership == 1
             and self.proof_response.uniqueness == 1
