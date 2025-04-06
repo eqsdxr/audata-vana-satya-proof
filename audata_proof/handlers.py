@@ -60,16 +60,14 @@ def check_uniqueness(
     Exception
         If there is an unexpected error occured.
     """
-    # Check function's input
+    # Check the function's input
     if not 0.0 <= similarity_threshold <= 1.0:
         raise ValueError('similarity_threshold must be between 0.0 and 1.0')
     if yield_per < 1:
         raise ValueError('yield_per must be >= 1')
 
-    # Get fingerprint and duration
+    # Get fingerprint, duration, and hash
     current_duration, current_fprint = fingerprint_file(file_path)
-
-    # Hash current fprint
     current_fprint_hash = md5(str(current_fprint).encode()).hexdigest()
 
     with db.session() as session:

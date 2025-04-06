@@ -18,12 +18,12 @@ class Proof:
         console_logger.info('Starting proof generation')
 
         input_file_path: str = os.path.join(
-            settings.INPUT_DIR, os.listdir(settings.INPUT_DIR)[9]
+            settings.INPUT_DIR, os.listdir(settings.INPUT_DIR)[8]
         )
 
         # Init single db session which will be passed into all handlers
         # It is generally recommended to do it this way to avoid
-        # excessive inits in functions which turns to be kind of chaotic
+        # excessive inits in functions which also turns to be kind of chaotic
         db.init()
 
         # Calculate proof-of-contribution scores: https://docs.vana.org/vana/core-concepts/key-elements/proof-of-contribution/example-implementation
