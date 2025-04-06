@@ -37,11 +37,15 @@ class Contributions(Base):
     # by PostgreSQL
     fingerprint = Column(Text, nullable=False)
     # Store hash for fast uniquness lookups.
-    fingerprint_hash = Column(String(32), unique=True, nullable=False) # 32 chars for md5
+    fingerprint_hash = Column(
+        String(32), unique=True, nullable=False
+    )  # 32 chars for md5
     # Again, we don't use "unique=True" here because if the link
     # is too long it's better to use hash instead
     file_link = Column(Text, nullable=False)
-    file_link_hash = Column(String(32), unique=True, nullable=False) # 32 chars for md5
+    file_link_hash = Column(
+        String(32), unique=True, nullable=False
+    )  # 32 chars for md5
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
     # Store duration for accurate fingerprint comparisons
     duration = Column(Float, nullable=False, default=30.0)
