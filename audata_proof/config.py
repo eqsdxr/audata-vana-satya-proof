@@ -1,16 +1,7 @@
 from functools import lru_cache
-from sys import stderr
 from typing import Literal
 
-from loguru import logger
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-# Single global logger configuration, import it from this file whenever needed
-logger.add(
-    stderr,
-    colorize=True,
-    format='<green>{time}</green> <level>{message}</level>',
-)
 
 
 class Settings(BaseSettings):
@@ -30,10 +21,10 @@ class Settings(BaseSettings):
     # TODO Needs clarifying
 
     DLP_ID: int = 1234
-    USE_SEALING: str = '/app/demo/sealed'
-    INPUT_DIR: str = '/app/demo/input'
+    USE_SEALING: str = 'demo/sealed'
+    INPUT_DIR: str = 'demo/input'
     USER_EMAIL: str | None = None
-    OUTPUT_DIR: str = '/app/demo/output'
+    OUTPUT_DIR: str = '.'
 
     # Database environment variables
 
@@ -66,7 +57,7 @@ class Settings(BaseSettings):
         port = self.DB_PORT
         db = getattr(self, f'DB_NAME_{env}')
 
-        return f'postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}'
+        return f'postgresql+psycopg://{user}:{password}@{host}:{port}/{db}'
 
     # Settings class configuration
     model_config = SettingsConfigDict(

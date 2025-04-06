@@ -2,9 +2,11 @@ import os
 
 from sqlalchemy.exc import MultipleResultsFound
 
+from loguru import logger as console_logger
+
+from audata_proof.config import settings
 from audata_proof import exc, handlers
 from audata_proof.db import db
-from audata_proof.config import logger, settings
 from audata_proof.models.proof_response import ProofResponse
 
 
@@ -14,10 +16,10 @@ class Proof:
 
     def generate(self) -> ProofResponse:
         """Generate proof"""
-        logger.info('Starting proof generation')
+        console_logger.info('Starting proof generation')
 
         input_file_path: str = os.path.join(
-            settings.INPUT_DIR, os.listdir(settings.INPUT_DIR)[3]
+            settings.INPUT_DIR, os.listdir(settings.INPUT_DIR)[5]
         )
 
         # Init single db session which will be passed into all handlers
@@ -29,6 +31,7 @@ class Proof:
         self.proof_response.ownership = 0
         self.proof_response.quality = 0
         self.proof_response.authenticity = 0  # How authentic is the data is (ie: not tampered with)? (Not implemented here)
+        self.proof_response.uniqueness = 0
 
         # Check uniqueness
         try:
@@ -36,13 +39,13 @@ class Proof:
             self.proof_response.uniqueness = 1
         # Keep them separate in order to add different logic in future
         except exc.FingerprintAlreadyExists as e:
-            logger.error(e)
+            console_logger.error(e)
         except exc.TooSimilarFingerprintAlreadyExists as e:
-            logger.error(e)
+            console_logger.error(e)
         except MultipleResultsFound as e:
-            logger.error(e)
+            console_logger.error(e)
         except Exception as e:
-            logger.error(e)
+            console_logger.error(e)
 
         # Calculate overall score and validity
         self.proof_response.score = 0

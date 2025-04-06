@@ -2,7 +2,8 @@ from hashlib import md5
 import os
 from acoustid import fingerprint_file
 
-from audata_proof.config import settings, logger
+from loguru import logger as console_logger
+from audata_proof.config import settings
 from audata_proof.db import db
 from audata_proof.models.db import Contributions
 
@@ -24,7 +25,7 @@ def seed_db_with_fprints(amount: int):
         with db.session() as session:
             session.add(new_contribution)
             session.commit()
-    logger.info(
+    console_logger.info(
         'Database was successfully seeded'
         'with amount of entities equal to: {}'.format(amount)
     )

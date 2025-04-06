@@ -1,7 +1,7 @@
 from hashlib import md5
 from acoustid import fingerprint_file, compare_fingerprints
 
-from audata_proof.config import logger
+from loguru import logger as console_logger
 from audata_proof.db import Database
 from audata_proof.exc import (
     FingerprintAlreadyExists,
@@ -72,7 +72,7 @@ def check_uniqueness(
             .one_or_none()
         )
         if duplicate:
-            logger.info(
+            console_logger.info(
                 'Exact fingerprint match found:\n'
                 f'Current fingerprint: {current_fprint}\n'
                 f'Hash of current fingerprint: {current_fprint_hash}\n'
@@ -85,14 +85,14 @@ def check_uniqueness(
         # Use yield_per to avoid loading all db in memory
         for contribution in session.query(Contributions).yield_per(yield_per):
             # Provide arguments in format (duration, fingerprint)
-            # Value is guaranteed to be between 0.0 and 1.0
+            # `similarity_score` is guaranteed to be between 0.0 and 1.0
             similarity_score = compare_fingerprints(
                 (current_duration, current_fprint),
                 (contribution.duration, contribution.fingerprint),
             )
 
             if similarity_score >= similarity_threshold:
-                logger.info(
+                console_logger.info(
                     f'Similar fingerprint found (similarity score: {similarity_score}):\n'
                     f'Current: {current_fprint}\n'
                     f'Hash of current: {current_fprint_hash}\n'
