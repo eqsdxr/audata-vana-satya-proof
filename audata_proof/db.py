@@ -1,11 +1,11 @@
 from contextlib import contextmanager
 from typing import Generator
 
+from loguru import logger as console_logger
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
-from loguru import logger as console_logger
 from audata_proof.config import settings
 from audata_proof.models.db import Base
 

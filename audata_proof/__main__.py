@@ -4,6 +4,7 @@ import sys
 import traceback
 
 from loguru import logger as console_logger
+
 from audata_proof.config import settings
 from audata_proof.proof import Proof
 
