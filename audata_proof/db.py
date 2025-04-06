@@ -16,10 +16,9 @@ class Database:
 
     def init(self) -> None:
         try:
-            # Get connection string with credentials
-            connection_string = settings.DB_URI
-            logger.error(connection_string)
-            self._engine = create_engine(connection_string, pool_pre_ping=True)
+            self._engine = create_engine(settings.DB_URI, pool_pre_ping=True)
+            # Temporary table creation for development purposes
+            # In production use Alembic
             Base.metadata.create_all(self._engine)
             self._SessionLocal = sessionmaker(bind=self._engine)
             logger.info('Database initialized successfully')
@@ -43,17 +42,6 @@ class Database:
             raise e
         finally:
             session.close()
-
-    def get_session(self) -> Session:
-        if not self._SessionLocal:
-            raise RuntimeError('Database not initialized. Call init() first.')
-        return self._SessionLocal()
-
-    def dispose(self) -> None:
-        if self._engine:
-            self._engine.dispose()
-            self._engine = None
-            self._SessionLocal = None
 
 
 # Global database instance
