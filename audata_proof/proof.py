@@ -1,22 +1,19 @@
-import logging
 import os
-from typing import Dict, Any
 
 from audata_proof import exc, handlers
+from audata_proof.config import logger, settings
 from audata_proof.models.proof_response import ProofResponse
-from audata_proof.config import logger
 
 
 class Proof:
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config
-        self.proof_response = ProofResponse(dlp_id=config["dlp_id"])
+    def __init__(self):
+        self.proof_response = ProofResponse(dlp_id=settings.DLP_ID)
 
     def generate(self) -> ProofResponse:
-        logger.info("Starting proof generation")
+        logger.info('Starting proof generation')
 
         input_file_path: str = os.path.join(
-            self.config["input_dir"], os.listdir(self.config["input_dir"])[3]
+            settings.INPUT_DIR, os.listdir(settings.INPUT_DIR)[3]
         )
 
         # Calculate proof-of-contribution scores: https://docs.vana.org/vana/core-concepts/key-elements/proof-of-contribution/example-implementation
@@ -50,7 +47,7 @@ class Proof:
 
         # Additional metadata about the proof, written onchain
         self.proof_response.metadata = {
-            "dlp_id": self.config["dlp_id"],
+            'dlp_id': settings.DLP_ID,
         }
 
         return self.proof_response

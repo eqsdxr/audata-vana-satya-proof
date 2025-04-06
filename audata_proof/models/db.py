@@ -1,12 +1,12 @@
 from uuid import uuid4
 
 from sqlalchemy import (
+    UUID,
     Boolean,
     Column,
+    DateTime,
     Float,
     Integer,
-    UUID,
-    DateTime,
     String,
     Text,
     func,
@@ -17,7 +17,7 @@ Base = declarative_base()
 
 
 class Users(Base):
-    __tablename__ = "users"
+    __tablename__ = 'users'
 
     id = Column(UUID, default=uuid4(), primary_key=True)
     # Count failed authenticity checks to ban users who exceed limit
@@ -28,7 +28,7 @@ class Users(Base):
 
 
 class Contributions(Base):
-    __tablename__ = "contributions"
+    __tablename__ = 'contributions'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     # Technically, the same fingerprint can be written

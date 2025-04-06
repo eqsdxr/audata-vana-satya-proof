@@ -2,10 +2,10 @@ from contextlib import contextmanager
 from typing import Generator
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session, sessionmaker
 
-from audata_proof.config import settings, logger
+from audata_proof.config import logger, settings
 from audata_proof.models.db import Base
 
 
@@ -22,16 +22,16 @@ class Database:
             self._engine = create_engine(connection_string, pool_pre_ping=True)
             Base.metadata.create_all(self._engine)
             self._SessionLocal = sessionmaker(bind=self._engine)
-            logger.info("Database initialized successfully")
+            logger.info('Database initialized successfully')
 
         except SQLAlchemyError as e:
-            logger.error(f"Database initialization failed: {e}")
+            logger.error(f'Database initialization failed: {e}')
             raise e
 
     @contextmanager
     def session(self) -> Generator[Session, None, None]:
         if not self._SessionLocal:
-            raise RuntimeError("Database not initialized. Call init() first.")
+            raise RuntimeError('Database not initialized. Call init() first.')
 
         session = self._SessionLocal()
         try:
@@ -39,14 +39,14 @@ class Database:
             session.commit()
         except Exception as e:
             session.rollback()
-            logger.error(f"{e}")
+            logger.error(f'{e}')
             raise e
         finally:
             session.close()
 
     def get_session(self) -> Session:
         if not self._SessionLocal:
-            raise RuntimeError("Database not initialized. Call init() first.")
+            raise RuntimeError('Database not initialized. Call init() first.')
         return self._SessionLocal()
 
     def dispose(self) -> None:
