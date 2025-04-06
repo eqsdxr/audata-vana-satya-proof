@@ -19,7 +19,9 @@ class Proof:
             settings.INPUT_DIR, os.listdir(settings.INPUT_DIR)[3]
         )
 
-        # Init db session
+        # Init single db session which will be passed into all handlers
+        # It is generally recommended to do it this way to avoid
+        # excessive inits in functions which turns to be kind of chaotic
         db.init()
 
         # Calculate proof-of-contribution scores: https://docs.vana.org/vana/core-concepts/key-elements/proof-of-contribution/example-implementation
