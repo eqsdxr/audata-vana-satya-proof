@@ -37,14 +37,16 @@ class Proof:
             handlers.check_uniqueness(input_file_path, db)
             self.proof_response.uniqueness = 1
         # Keep them separate in order to add different logic in future
-        except exc.FingerprintAlreadyExists as e:
-            console_logger.error(e)
-        except exc.TooSimilarFingerprintAlreadyExists as e:
-            console_logger.error(e)
-        except MultipleResultsFound as e:
-            console_logger.error(e)
-        except Exception as e:
-            console_logger.error(e)
+        except exc.FingerprintAlreadyExists:
+            pass
+        except exc.TooSimilarFingerprintAlreadyExists:
+            pass
+        except exc.FingerprintComparisonTypeError:
+            pass
+        except MultipleResultsFound:
+            pass
+        except Exception:
+            pass
 
         # Calculate overall score and validity
         self.proof_response.score = 0
