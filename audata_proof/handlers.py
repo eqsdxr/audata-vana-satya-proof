@@ -98,6 +98,9 @@ def check_uniqueness(
                     f'Existing one: {db_fprint}\n'
                     f'Hash of existing one: {db_fprint}\n'
                 )
+                # Raise custom exceptions to make it clearer what's wrong.
+                # If the exception is raised check types and values of
+                # variables that compare_fingerprints function gets
                 raise FingerprintComparisonTypeError()
             # For debugging purposes
             except Exception as e:
