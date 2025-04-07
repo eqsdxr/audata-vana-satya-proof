@@ -36,7 +36,8 @@ def check_uniqueness(
 
     Returns
     -------
-    1 or 0
+    1 if it's unique
+    0 if not
 
     Raises
     ------

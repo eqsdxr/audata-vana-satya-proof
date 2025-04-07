@@ -38,6 +38,14 @@ class Proof:
             self.file_path, self.db
         )
 
+        # self.proof_response.quality = check_quality(
+        #    self.file_path
+        # )
+
+        # self.proof_response.quality = check_authenticity(
+        #    self.file_path
+        # )
+
         # Assign validity
         self.proof_response.valid = (
             self.proof_response.ownership == 1
