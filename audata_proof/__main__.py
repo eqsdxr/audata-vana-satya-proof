@@ -8,7 +8,7 @@ from loguru import logger as console_logger
 from audata_proof.config import settings
 from audata_proof.db import db
 from audata_proof.proof import Proof
-from audata_proof.utils import unzip_dir
+from audata_proof.utils import check_user, extract_data, unzip_dir
 
 
 def run() -> None:
@@ -23,12 +23,17 @@ def run() -> None:
 
     unzip_dir(settings.INPUT_DIR)
 
+    ogg_files, telegram_id = extract_data(settings.INPUT_DIR)
+
     # Init single db session which will be passed into all handlers
     # It is generally recommended to do it this way to avoid
     # excessive inits in functions which also turns to be kind of chaotic
     db.init()
 
-    proof = Proof(db)
+    # Make sure user exists or create one
+    check_user(telegram_id, db)
+
+    proof = Proof(db, ogg_files[0], telegram_id)
     proof_response = proof.generate()
 
     output_path = os.path.join(settings.OUTPUT_DIR, 'results.json')

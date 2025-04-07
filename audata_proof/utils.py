@@ -8,8 +8,8 @@ from acoustid import fingerprint_file
 from loguru import logger as console_logger
 
 from audata_proof.config import settings
-from audata_proof.db import db
-from audata_proof.models.db import Contributions
+from audata_proof.db import Database, db
+from audata_proof.models.db import Contributions, Users
 
 
 def seed_db_with_fprints(amount: int):
@@ -81,3 +81,27 @@ def extract_data(dir) -> tuple:
         raise AttributeError()
 
     return ogg_files, user_telegram_id
+
+
+def check_user(telegram_id: str, db: Database) -> None:
+    """
+    Make sure that user does exist, if not, create one.
+    """
+    with db.session() as session:
+        user = (
+            session.query(Users)
+            .filter_by(telegram_id=str(telegram_id))
+            .one_or_none()
+        )
+
+        if not user:
+            create_new_user(telegram_id, db)
+
+
+def create_new_user(telegram_id: str, db: Database) -> None:
+    telegram_id = str(telegram_id)
+    new_user = Users(telegram_id=telegram_id)
+    with db.session() as session:
+        session.add(new_user)
+        session.commit()
+    console_logger.info(f'New user with id {telegram_id} created')

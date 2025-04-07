@@ -9,7 +9,6 @@ from audata_proof.exc import (
     FingerprintComparisonTypeError,
 )
 from audata_proof.models.db import Contributions, Users
-from audata_proof.users import init_new_user
 from audata_proof.utils import decode_db_fingerprint
 
 
@@ -138,14 +137,7 @@ def check_ownership(telegram_id: str, db: Database) -> Literal[0, 1]:
     """
     with db.session() as session:
         user = (
-            session.query(Users)
-            .filter_by(telegram_id=str(telegram_id))
-            .one_or_none()
+            session.query(Users).filter_by(telegram_id=str(telegram_id)).one()
         )
-
-        if not user:
-            init_new_user(telegram_id, db)
-            # User doesn't have any violations since it's a new user
-            return 1
 
         return 0 if user.is_banned else 1  # type: ignore
