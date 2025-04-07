@@ -5,6 +5,7 @@ from audata_proof.models.db import Users
 
 
 def init_new_user(telegram_id: str, db: Database) -> None:
+    telegram_id = str(telegram_id)
     new_user = Users(telegram_id=telegram_id)
     with db.session() as session:
         session.add(new_user)

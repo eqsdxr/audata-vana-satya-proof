@@ -128,10 +128,11 @@ def check_uniqueness(
 
 def check_ownership(telegram_id: str, db: Database) -> Literal[0, 1]:
     """
-    A user is considered to have ownership unless they have been banned.
+    A user is considered to pass ownership test unless they have been banned.
     If the user doesn't exist, they're initialized and granted ownership.
 
-    Returns:
+    Returns
+    -------
         1 if user has not been banned
         0 if banned
     """
