@@ -1,15 +1,15 @@
 from hashlib import md5
+from typing import Literal
 
 from acoustid import compare_fingerprints, fingerprint_file
 from loguru import logger as console_logger
 
 from audata_proof.db import Database
 from audata_proof.exc import (
-    FingerprintAlreadyExists,
     FingerprintComparisonTypeError,
-    TooSimilarFingerprintAlreadyExists,
 )
-from audata_proof.models.db import Contributions
+from audata_proof.models.db import Contributions, Users
+from audata_proof.users import init_new_user
 from audata_proof.utils import decode_db_fingerprint
 
 
@@ -18,7 +18,7 @@ def check_uniqueness(
     db: Database,
     similarity_threshold: float = 0.8,
     yield_per: int = 5,
-) -> None:
+) -> Literal[0, 1]:
     """
     Check fingerprint for uniqueness.
 
@@ -37,23 +37,13 @@ def check_uniqueness(
 
     Returns
     -------
-    None
-        No value is returned. Control flow is managed using
-        try-except constructions, and exceptions are raised
-        if conditions for uniqueness are violated. It is made
-        in this way for the sake of simple mechanism of
-        returning different error messages to a user.
+    1 or 0
 
     Raises
     ------
-    FingerprintAlreadyExists
-        If a fingerprint with the same hash exists in the
-        database.
     FingerprintComparisonTypeError
         if type of fingerprints were incorrect while
         comparing.
-    TooSimilarFingerprintAlreadyExists
-        If a fingerprint exceeds the similarity threshold.
     MultipleResultsFound
         If multiple fingerprints with the same hash exists
         in the database.
@@ -85,7 +75,7 @@ def check_uniqueness(
                 f'Fingerprint in DB: {decode_db_fingerprint(str(duplicate.fingerprint))}\n'
                 f'Hash of fingerprint in DB: {duplicate.fingerprint_hash}'
             )
-            raise FingerprintAlreadyExists(f'Hash: {current_fprint_hash}')
+            return 0
 
         # Loop through db fingerprints and compare for similarity
         # Use yield_per to avoid loading all db in memory
@@ -128,4 +118,30 @@ def check_uniqueness(
                     f'Existing: {db_fprint}\n'
                     f'Hash of existing: {db_fprint}\n'
                 )
-                raise TooSimilarFingerprintAlreadyExists()
+                return 0
+    # All checks are passed
+    return 1
+
+
+def check_ownership(telegram_id: str, db: Database) -> Literal[0, 1]:
+    """
+    A user is considered to have ownership unless they have been banned.
+    If the user doesn't exist, they're initialized and granted ownership.
+
+    Returns:
+        1 if user has not been banned
+        0 if banned
+    """
+    with db.session() as session:
+        user = (
+            session.query(Users)
+            .filter_by(telegram_id=str(telegram_id))
+            .one_or_none()
+        )
+
+        if not user:
+            init_new_user(telegram_id, db)
+            # User doesn't have any violations since it's a new user
+            return 1
+
+        return 0 if user.is_banned else 1  # type: ignore

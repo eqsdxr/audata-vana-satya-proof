@@ -1,4 +1,6 @@
+import json
 import os
+import zipfile
 from binascii import Error as BinasciiError
 from hashlib import md5
 
@@ -44,3 +46,38 @@ def decode_db_fingerprint(fprint: str):
         console_logger.error(f'Error decoding fingerprint from hex: {e}')
         raise BinasciiError()
     return db_fingerprint
+
+
+def unzip_dir(dir) -> None:
+    """
+    If the input directory contains any zip files, extract them
+    """
+    for input_filename in os.listdir(dir):
+        input_file = os.path.join(dir, input_filename)
+
+        if zipfile.is_zipfile(input_file):
+            with zipfile.ZipFile(input_file, 'r') as zip_ref:
+                zip_ref.extractall(dir)
+
+
+def extract_data(dir) -> tuple:
+    ogg_files = []
+    user_telegram_id = None
+
+    for filename in os.listdir(dir):
+        file_path = os.path.join(dir, filename)
+        ext = os.path.splitext(filename)[1].lower()
+
+        if ext == '.json' and filename == 'account.json':
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+                user_telegram_id = data.get('telegram_id')
+
+        elif ext == '.ogg':
+            ogg_files.append(file_path)
+
+    if not user_telegram_id or not ogg_files:
+        console_logger.error(f'Missing or corrupted files in directory {dir}')
+        raise AttributeError()
+
+    return ogg_files, user_telegram_id

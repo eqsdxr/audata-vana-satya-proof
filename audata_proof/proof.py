@@ -1,55 +1,45 @@
-import os
-
 from loguru import logger as console_logger
-from sqlalchemy.exc import MultipleResultsFound
 
-from audata_proof import exc, handlers
 from audata_proof.config import settings
-from audata_proof.db import db
+from audata_proof.db import Database
+from audata_proof.handlers import check_ownership, check_uniqueness
 from audata_proof.models.proof_response import ProofResponse
+from audata_proof.utils import extract_data
 
 
 class Proof:
-    def __init__(self):
+    def __init__(self, db: Database):
         self.proof_response = ProofResponse(dlp_id=settings.DLP_ID)
+        self.db = db
+        self.telegram_id = None
 
-    def generate(self) -> ProofResponse:
-        """Generate proof"""
-        console_logger.info('Starting proof generation')
-
-        input_file_path: str = os.path.join(
-            settings.INPUT_DIR, os.listdir(settings.INPUT_DIR)[8]
-        )
-
-        # Init single db session which will be passed into all handlers
-        # It is generally recommended to do it this way to avoid
-        # excessive inits in functions which also turns to be kind of chaotic
-        db.init()
-
-        # Calculate proof-of-contribution scores: https://docs.vana.org/vana/core-concepts/key-elements/proof-of-contribution/example-implementation
+        # https://docs.vana.org/vana/core-concepts/key-elements/proof-of-contribution/example-implementation
         self.proof_response.ownership = 0
         self.proof_response.quality = 0
         self.proof_response.authenticity = 0  # How authentic is the data is (ie: not tampered with)? (Not implemented here)
         self.proof_response.uniqueness = 0
 
-        # Check uniqueness
-        try:
-            handlers.check_uniqueness(input_file_path, db)
-            self.proof_response.uniqueness = 1
-        # Keep them separate in order to add different logic in future
-        except exc.FingerprintAlreadyExists:
-            pass
-        except exc.TooSimilarFingerprintAlreadyExists:
-            pass
-        except exc.FingerprintComparisonTypeError:
-            pass
-        except MultipleResultsFound:
-            pass
-        except Exception:
-            pass
-
-        # Calculate overall score and validity
         self.proof_response.score = 0
+
+        # Additional (public) properties to include in the proof about the data
+        self.proof_response.attributes = {}
+
+    def generate(self) -> ProofResponse:
+        """Generate proof"""
+
+        console_logger.info('Starting proof generation')
+
+        ogg_files, self.telegram_id = extract_data(settings.INPUT_DIR)
+
+        self.proof_response.ownership = check_ownership(
+            self.telegram_id, self.db
+        )
+
+        # It is expected that only one file is provided for now
+        # so it's why [0] is used here
+        self.proof_response.uniqueness = check_uniqueness(
+            ogg_files[0], self.db
+        )
 
         # Assign validity
         self.proof_response.valid = (
@@ -58,9 +48,6 @@ class Proof:
             and self.proof_response.authenticity == 1
             and (self.proof_response.quality > 0.5)
         )
-
-        # Additional (public) properties to include in the proof about the data
-        self.proof_response.attributes = {}
 
         # Additional metadata about the proof, written onchain
         self.proof_response.metadata = {

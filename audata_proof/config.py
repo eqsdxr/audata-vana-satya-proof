@@ -70,7 +70,7 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)  # Optimize settings getting
 def get_settings():
-    return Settings()  # type: ignore # Suppress useless warning
+    return Settings()  # type: ignore
 
 
 # Global settings object

@@ -13,3 +13,14 @@ class TooSimilarFingerprintAlreadyExists(Exception):
 
 class FingerprintComparisonTypeError(Exception):
     pass
+
+
+# Exceptions for user operations
+
+
+class UserNotFound(Exception):
+    pass
+
+
+class UserIsBanned(Exception):
+    pass

@@ -25,6 +25,9 @@ class Users(Base):
     is_banned = Column(Boolean, default=False)
     # Use server-side timestamp to ensure consistency across time zones and avoid app-server clock drift
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+    # Keep it nullable in case user use another service (whatsapp, etc.)
+    # Store it as a string for simplicity
+    telegram_id = Column(String(32), unique=True, nullable=True)
 
 
 class Contributions(Base):
