@@ -85,7 +85,7 @@ def extract_data(dir) -> tuple:
 
 def check_user(telegram_id: str, db: Database) -> None:
     """
-    Make sure that user does exist, if not, create one.
+    Check if a user with this id exists, if not, create one.
     """
     with db.session() as session:
         user = (

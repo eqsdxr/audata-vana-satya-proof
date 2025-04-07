@@ -26,7 +26,7 @@ class Database:
 
         except SQLAlchemyError as e:
             console_logger.error(f'Database initialization failed: {e}')
-            raise e
+            raise
 
     @contextmanager
     def session(self) -> Generator[Session, None, None]:
@@ -42,7 +42,7 @@ class Database:
             console_logger.error(
                 f'Exception while working with a database session: {e}'
             )
-            raise e
+            raise
         finally:
             session.close()
 

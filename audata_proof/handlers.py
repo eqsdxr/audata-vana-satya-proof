@@ -5,9 +5,6 @@ from acoustid import compare_fingerprints, fingerprint_file
 from loguru import logger as console_logger
 
 from audata_proof.db import Database
-from audata_proof.exc import (
-    FingerprintComparisonTypeError,
-)
 from audata_proof.models.db import Contributions, Users
 from audata_proof.utils import decode_db_fingerprint
 
@@ -91,6 +88,8 @@ def check_uniqueness(
                     (contribution.duration, db_fprint),
                 )
             except TypeError as e:
+                # If the exception is raised check types and values of
+                # variables that compare_fingerprints function gets
                 console_logger.error(
                     f'Type error in comparison: {e}'
                     f'Current one: {current_fprint}\n'
@@ -98,10 +97,7 @@ def check_uniqueness(
                     f'Existing one: {db_fprint}\n'
                     f'Hash of existing one: {db_fprint}\n'
                 )
-                # Raise custom exceptions to make it clearer what's wrong.
-                # If the exception is raised check types and values of
-                # variables that compare_fingerprints function gets
-                raise FingerprintComparisonTypeError()
+                raise
             # For debugging purposes
             except Exception as e:
                 console_logger.error(
@@ -111,7 +107,7 @@ def check_uniqueness(
                     f'Existing one: {db_fprint}\n'
                     f'Hash of existing one: {db_fprint}\n'
                 )
-                raise e
+                raise
 
             if similarity_score >= similarity_threshold:
                 console_logger.info(
