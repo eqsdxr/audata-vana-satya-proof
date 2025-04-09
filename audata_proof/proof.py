@@ -2,7 +2,7 @@ from loguru import logger as console_logger
 
 from audata_proof.config import settings
 from audata_proof.db import Database
-from audata_proof.handlers import check_ownership, check_uniqueness
+from audata_proof import handlers
 from audata_proof.models.proof_response import ProofResponse
 
 
@@ -30,23 +30,23 @@ class Proof:
 
         console_logger.info('Starting proof generation')
 
-        self.proof_response.ownership = check_ownership(
+        self.proof_response.ownership = handlers.check_ownership(
             self.telegram_id, self.db
         )
 
-        self.proof_response.uniqueness = check_uniqueness(
+        self.proof_response.uniqueness = handlers.check_uniqueness(
             self.file_path, self.db
         )
 
-        # self.proof_response.quality = check_quality(
-        #    self.file_path
-        # )
+        self.proof_response.quality = handlers.check_authenticity(
+           self.file_path
+        )
 
-        # self.proof_response.quality = check_authenticity(
-        #    self.file_path
-        # )
+        self.proof_response.quality = handlers.check_quality(
+           self.file_path
+        )
 
-        # Assign validity
+        # Check validity
         self.proof_response.valid = (
             self.proof_response.ownership == 1
             and self.proof_response.uniqueness == 1

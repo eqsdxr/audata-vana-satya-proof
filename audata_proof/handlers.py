@@ -138,3 +138,13 @@ def check_ownership(telegram_id: str, db: Database) -> Literal[0, 1]:
         )
 
         return 0 if user.is_banned else 1  # type: ignore
+
+
+def check_authenticity(file_path: str) -> Literal[0, 1]:
+    """Work in progress..."""
+    return 0
+
+
+def check_quality(file_path: str) -> int:
+    """Work in progress..."""
+    return 0
