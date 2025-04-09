@@ -21,10 +21,10 @@ class Settings(BaseSettings):
     # TODO Needs clarifying
 
     DLP_ID: int = 1234
-    USE_SEALING: str = 'demo/sealed'
-    INPUT_DIR: str = 'demo/input'
+    USE_SEALING: str = '/sealed'
+    INPUT_DIR: str = '/input'
     USER_EMAIL: str | None = None
-    OUTPUT_DIR: str = '.'
+    OUTPUT_DIR: str = '/output'
 
     # Database environment variables
 

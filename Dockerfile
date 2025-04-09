@@ -13,11 +13,7 @@ COPY . /app/
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen
 
-# Make sure fpcalc required by acoust id library is executable
-RUN chmod +x /app/fpcalc && \
-    ln -s /app/fpcalc /usr/local/bin/fpcalc
-
-# Install chromaprint required by acoustid library
+# Install chromaprint and ffmeg required by acoustid library
 RUN apt-get update && apt-get install -y \
     libchromaprint-dev \
     ffmpeg \
