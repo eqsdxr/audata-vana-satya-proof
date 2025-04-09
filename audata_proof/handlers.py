@@ -38,7 +38,7 @@ def check_uniqueness(
 
     Raises
     ------
-    FingerprintComparisonTypeError
+    TypeError
         if type of fingerprints were incorrect while
         comparing.
     MultipleResultsFound
