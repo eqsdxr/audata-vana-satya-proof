@@ -3,15 +3,17 @@ from typing import Literal
 
 import numpy as np
 import torch
+import librosa
 import yaml
 from acoustid import compare_fingerprints, fingerprint_file
 from loguru import logger as console_logger
+from speechmos import dnsmos
 
+from audata_proof.config import settings
 from audata_proof.db import Database
+from audata_proof.model.model import RawNet
 from audata_proof.schemas.db import Contributions, Users
 from audata_proof.utils import decode_db_fingerprint, pad, process_audio
-from audata_proof.config import settings
-from audata_proof.model.model import RawNet
 
 
 def check_uniqueness(
@@ -143,14 +145,16 @@ def check_ownership(telegram_id: str, db: Database) -> Literal[0, 1]:
 
 
 def check_authenticity(file_path: str) -> Literal[0, 1]:
-    with open(settings.path_to_yaml, "r") as f:
+    with open(settings.path_to_yaml, 'r') as f:
         config = yaml.safe_load(f)
 
-    device = torch.device("cpu")
+    device = torch.device('cpu')
 
-    model = RawNet(config["model"], device=device)
+    model = RawNet(config['model'], device=device)
     model.load_state_dict(
-        torch.load(settings.path_to_model, map_location="cpu", weights_only=False)
+        torch.load(
+            settings.path_to_model, map_location='cpu', weights_only=False
+        )
     )
     model.eval()
     model = model.to(device)
@@ -184,12 +188,47 @@ def check_authenticity(file_path: str) -> Literal[0, 1]:
             probs.append(softmax_out)
 
     final_prob = float(np.mean(probs))
-    print("Likely Real" if final_prob > 0.5 else "Likely Fake")
-    print(f"Score: {final_prob}")
+    print('Likely Real' if final_prob > 0.5 else 'Likely Fake')
+    print(f'Score: {final_prob}')
     return 1 if final_prob > 0.5 else 0
 
 
 
-def check_quality(file_path: str) -> float:
-    """Work in progress..."""
-    return 0.0
+
+class Quality:
+    def __init__(self, target_sr=16000, max_duration=120.0) -> None:
+        self.target_sr = target_sr
+        self.max_duration = max_duration
+
+    def load_audio(self, file_path: str):
+        amplitudes, _ = librosa.load(
+            file_path, sr=self.target_sr
+        )  # for dnsmos we need sr=16000
+        signal = librosa.util.normalize(amplitudes)
+
+        return signal
+
+    def get_p835_metrics(self, amplitudes):
+        result = dnsmos.run(amplitudes, sr=self.target_sr)
+        del result["p808_mos"]  # delete P.808 metric # type: ignore
+
+        mos_mean = np.mean([float(i) for i in result.values()]) * 2 / 10 #type: ignore
+
+        return mos_mean
+
+    def get_duration_score(self, duration, max_duration=120.0):
+        duration_score = min(duration / max_duration, 1.0)
+
+        return duration_score
+
+    def check_quality(self, file_path):
+        try:
+            y = self.load_audio(file_path)
+
+        except FileNotFoundError:  # if filename is incorrect or file not found
+            console_logger.error("File not found!")
+            return
+
+        sig_score = self.get_p835_metrics(y)
+
+        return sig_score

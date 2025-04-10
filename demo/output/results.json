@@ -1,0 +1,13 @@
+{
+  "dlp_id": 1234,
+  "valid": false,
+  "score": 0,
+  "authenticity": 1,
+  "ownership": 0,
+  "quality": 0.0,
+  "uniqueness": 1,
+  "attributes": {},
+  "metadata": {
+    "dlp_id": 1234
+  }
+}

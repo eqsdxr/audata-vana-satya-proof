@@ -38,11 +38,12 @@ class Proof:
             self.file_path, self.db
         )
 
-        self.proof_response.authenticity= handlers.check_authenticity(
+        self.proof_response.authenticity = handlers.check_authenticity(
             self.file_path,
         )
 
-        self.proof_response.quality = handlers.check_quality(self.file_path)
+        quality_evaluator = handlers.Quality()
+        self.proof_response.quality = quality_evaluator.check_quality(self.file_path) #type: ignore
 
         # Check validity
         self.proof_response.valid = (

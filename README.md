@@ -28,4 +28,7 @@ docker run \
 audata-proof
 ```
 
-Remember to populate the `/input` directory with the files you want to process.
+Important notes:
+- Make sure you specified your postgres credentials and env.
+  - You can use `seed_db` function from utils.py to populate db with data, just put raw `.ogg` files into `input` folder.
+- Also, make sure you populated the `/input` directory with a zip archive you want to process.

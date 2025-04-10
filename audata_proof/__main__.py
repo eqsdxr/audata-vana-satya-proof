@@ -37,8 +37,8 @@ def run() -> None:
     proof_response = proof.generate()
 
     output_path = os.path.join(settings.OUTPUT_DIR, 'results.json')
-    with open(output_path, 'w') as f:
-        json.dump(proof_response.model_dump(), f, indent=2)
+    #with open(output_path, 'w') as f:
+        #json.dump(proof_response.model_dump(), f, indent=2)
     console_logger.info(f'Proof generation complete: {proof_response}')
 
 

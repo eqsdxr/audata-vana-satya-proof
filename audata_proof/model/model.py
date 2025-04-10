@@ -5,8 +5,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from torch.nn.parameter import Parameter
-from torch.utils import data
 
 
 class SincConv(nn.Module):
@@ -31,13 +29,11 @@ class SincConv(nn.Module):
         bias=False,
         groups=1,
     ):
-
         super(SincConv, self).__init__()
 
         if in_channels != 1:
-
             msg = (
-                "SincConv only support one input channel (here, in_channels = {%i})"
+                'SincConv only support one input channel (here, in_channels = {%i})'
                 % (in_channels)
             )
             raise ValueError(msg)
@@ -56,9 +52,9 @@ class SincConv(nn.Module):
         self.dilation = dilation
 
         if bias:
-            raise ValueError("SincConv does not support bias.")
+            raise ValueError('SincConv does not support bias.')
         if groups > 1:
-            raise ValueError("SincConv does not support groups.")
+            raise ValueError('SincConv does not support groups.')
 
         # initialize filterbanks using Mel scale
         NFFT = 512
@@ -177,71 +173,83 @@ class RawNet(nn.Module):
 
         self.Sinc_conv = SincConv(
             device=self.device,
-            out_channels=d_args["filts"][0],
-            kernel_size=d_args["first_conv"],
-            in_channels=d_args["in_channels"],
+            out_channels=d_args['filts'][0],
+            kernel_size=d_args['first_conv'],
+            in_channels=d_args['in_channels'],
         )
 
-        self.first_bn = nn.BatchNorm1d(num_features=d_args["filts"][0])
+        self.first_bn = nn.BatchNorm1d(num_features=d_args['filts'][0])
         self.selu = nn.SELU(inplace=True)
         self.block0 = nn.Sequential(
-            Residual_block(nb_filts=d_args["filts"][1], first=True)
+            Residual_block(nb_filts=d_args['filts'][1], first=True)
         )
-        self.block1 = nn.Sequential(Residual_block(nb_filts=d_args["filts"][1]))
-        self.block2 = nn.Sequential(Residual_block(nb_filts=d_args["filts"][2]))
-        d_args["filts"][2][0] = d_args["filts"][2][1]
-        self.block3 = nn.Sequential(Residual_block(nb_filts=d_args["filts"][2]))
-        self.block4 = nn.Sequential(Residual_block(nb_filts=d_args["filts"][2]))
-        self.block5 = nn.Sequential(Residual_block(nb_filts=d_args["filts"][2]))
+        self.block1 = nn.Sequential(
+            Residual_block(nb_filts=d_args['filts'][1])
+        )
+        self.block2 = nn.Sequential(
+            Residual_block(nb_filts=d_args['filts'][2])
+        )
+        d_args['filts'][2][0] = d_args['filts'][2][1]
+        self.block3 = nn.Sequential(
+            Residual_block(nb_filts=d_args['filts'][2])
+        )
+        self.block4 = nn.Sequential(
+            Residual_block(nb_filts=d_args['filts'][2])
+        )
+        self.block5 = nn.Sequential(
+            Residual_block(nb_filts=d_args['filts'][2])
+        )
         self.avgpool = nn.AdaptiveAvgPool1d(1)
 
         self.fc_attention0 = self._make_attention_fc(
-            in_features=d_args["filts"][1][-1],
-            l_out_features=d_args["filts"][1][-1],
+            in_features=d_args['filts'][1][-1],
+            l_out_features=d_args['filts'][1][-1],
         )
         self.fc_attention1 = self._make_attention_fc(
-            in_features=d_args["filts"][1][-1],
-            l_out_features=d_args["filts"][1][-1],
+            in_features=d_args['filts'][1][-1],
+            l_out_features=d_args['filts'][1][-1],
         )
         self.fc_attention2 = self._make_attention_fc(
-            in_features=d_args["filts"][2][-1],
-            l_out_features=d_args["filts"][2][-1],
+            in_features=d_args['filts'][2][-1],
+            l_out_features=d_args['filts'][2][-1],
         )
         self.fc_attention3 = self._make_attention_fc(
-            in_features=d_args["filts"][2][-1],
-            l_out_features=d_args["filts"][2][-1],
+            in_features=d_args['filts'][2][-1],
+            l_out_features=d_args['filts'][2][-1],
         )
         self.fc_attention4 = self._make_attention_fc(
-            in_features=d_args["filts"][2][-1],
-            l_out_features=d_args["filts"][2][-1],
+            in_features=d_args['filts'][2][-1],
+            l_out_features=d_args['filts'][2][-1],
         )
         self.fc_attention5 = self._make_attention_fc(
-            in_features=d_args["filts"][2][-1],
-            l_out_features=d_args["filts"][2][-1],
+            in_features=d_args['filts'][2][-1],
+            l_out_features=d_args['filts'][2][-1],
         )
 
-        self.bn_before_gru = nn.BatchNorm1d(num_features=d_args["filts"][2][-1])
+        self.bn_before_gru = nn.BatchNorm1d(
+            num_features=d_args['filts'][2][-1]
+        )
         self.gru = nn.GRU(
-            input_size=d_args["filts"][2][-1],
-            hidden_size=d_args["gru_node"],
-            num_layers=d_args["nb_gru_layer"],
+            input_size=d_args['filts'][2][-1],
+            hidden_size=d_args['gru_node'],
+            num_layers=d_args['nb_gru_layer'],
             batch_first=True,
         )
 
         self.fc1_binary_gru = nn.Linear(
-            in_features=d_args["gru_node"], out_features=d_args["nb_fc_node"]
+            in_features=d_args['gru_node'], out_features=d_args['nb_fc_node']
         )
 
         self.fc2_binary_gru = nn.Linear(
-            in_features=d_args["nb_fc_node"], out_features=2, bias=True
+            in_features=d_args['nb_fc_node'], out_features=2, bias=True
         )
 
         self.fc1_multi_gru = nn.Linear(
-            in_features=d_args["gru_node"], out_features=d_args["nb_fc_node"]
+            in_features=d_args['gru_node'], out_features=d_args['nb_fc_node']
         )
 
         self.fc2_multi_gru = nn.Linear(
-            in_features=d_args["nb_fc_node"], out_features=7, bias=True
+            in_features=d_args['nb_fc_node'], out_features=7, bias=True
         )
 
         self.sig = nn.Sigmoid()
@@ -339,7 +347,6 @@ class RawNet(nn.Module):
         return output_binary, output_multi
 
     def _make_attention_fc(self, in_features, l_out_features):
-
         l_fc = []
 
         l_fc.append(
@@ -359,40 +366,42 @@ class RawNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def summary(self, input_size, batch_size=-1, device="cuda", print_fn=None):
+    def summary(self, input_size, batch_size=-1, device='cuda', print_fn=None):
         if print_fn == None:
             printfn = print
         model = self
 
         def register_hook(module):
             def hook(module, input, output):
-                class_name = str(module.__class__).split(".")[-1].split("'")[0]
+                class_name = str(module.__class__).split('.')[-1].split("'")[0]
                 module_idx = len(summary)
 
-                m_key = "%s-%i" % (class_name, module_idx + 1)
+                m_key = '%s-%i' % (class_name, module_idx + 1)
                 summary[m_key] = OrderedDict()
-                summary[m_key]["input_shape"] = list(input[0].size())
-                summary[m_key]["input_shape"][0] = batch_size
+                summary[m_key]['input_shape'] = list(input[0].size())
+                summary[m_key]['input_shape'][0] = batch_size
                 if isinstance(output, (list, tuple)):
-                    summary[m_key]["output_shape"] = [
+                    summary[m_key]['output_shape'] = [
                         [-1] + list(o.size())[1:] for o in output
                     ]
                 else:
-                    summary[m_key]["output_shape"] = list(output.size())
-                    if len(summary[m_key]["output_shape"]) != 0:
-                        summary[m_key]["output_shape"][0] = batch_size
+                    summary[m_key]['output_shape'] = list(output.size())
+                    if len(summary[m_key]['output_shape']) != 0:
+                        summary[m_key]['output_shape'][0] = batch_size
 
                 params = 0
-                if hasattr(module, "weight") and hasattr(module.weight, "size"):
+                if hasattr(module, 'weight') and hasattr(
+                    module.weight, 'size'
+                ):
                     params += torch.prod(
                         torch.LongTensor(list(module.weight.size()))
                     )
-                    summary[m_key]["trainable"] = module.weight.requires_grad
-                if hasattr(module, "bias") and hasattr(module.bias, "size"):
+                    summary[m_key]['trainable'] = module.weight.requires_grad
+                if hasattr(module, 'bias') and hasattr(module.bias, 'size'):
                     params += torch.prod(
                         torch.LongTensor(list(module.bias.size()))
                     )
-                summary[m_key]["nb_params"] = params
+                summary[m_key]['nb_params'] = params
 
             if (
                 not isinstance(module, nn.Sequential)
@@ -403,11 +412,11 @@ class RawNet(nn.Module):
 
         device = device.lower()
         assert device in [
-            "cuda",
-            "cpu",
+            'cuda',
+            'cpu',
         ], "Input device is not valid, please specify 'cuda' or 'cpu'"
 
-        if device == "cuda" and torch.cuda.is_available():
+        if device == 'cuda' and torch.cuda.is_available():
             dtype = torch.cuda.FloatTensor
         else:
             dtype = torch.FloatTensor
@@ -422,28 +431,28 @@ class RawNet(nn.Module):
             h.remove()
 
         print_fn(
-            "----------------------------------------------------------------"
+            '----------------------------------------------------------------'
         )
-        line_new = "{:>20}  {:>25} {:>15}".format(
-            "Layer (type)", "Output Shape", "Param #"
+        line_new = '{:>20}  {:>25} {:>15}'.format(
+            'Layer (type)', 'Output Shape', 'Param #'
         )
         print_fn(line_new)
         print_fn(
-            "================================================================"
+            '================================================================'
         )
         total_params = 0
         total_output = 0
         trainable_params = 0
         for layer in summary:
             # input_shape, output_shape, trainable, nb_params
-            line_new = "{:>20}  {:>25} {:>15}".format(
+            line_new = '{:>20}  {:>25} {:>15}'.format(
                 layer,
-                str(summary[layer]["output_shape"]),
-                "{0:,}".format(summary[layer]["nb_params"]),
+                str(summary[layer]['output_shape']),
+                '{0:,}'.format(summary[layer]['nb_params']),
             )
-            total_params += summary[layer]["nb_params"]
-            total_output += np.prod(summary[layer]["output_shape"])
-            if "trainable" in summary[layer]:
-                if summary[layer]["trainable"] == True:
-                    trainable_params += summary[layer]["nb_params"]
+            total_params += summary[layer]['nb_params']
+            total_output += np.prod(summary[layer]['output_shape'])
+            if 'trainable' in summary[layer]:
+                if summary[layer]['trainable'] == True:
+                    trainable_params += summary[layer]['nb_params']
             print_fn(line_new)

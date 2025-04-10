@@ -4,10 +4,10 @@ import zipfile
 from binascii import Error as BinasciiError
 from hashlib import md5
 
+import librosa
+import numpy as np
 from acoustid import fingerprint_file
 from loguru import logger as console_logger
-import numpy as np
-import librosa
 
 from audata_proof.config import settings
 from audata_proof.db import Database, db
@@ -107,7 +107,6 @@ def create_new_user(telegram_id: str, db: Database) -> None:
         session.add(new_user)
         session.commit()
     console_logger.info(f'New user with id {telegram_id} created')
-
 
 
 def pad(y, max_len=96000):

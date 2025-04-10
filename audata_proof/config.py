@@ -12,8 +12,8 @@ class Settings(BaseSettings):
     from .env, fields without default values are mandatory.
     """
 
-    path_to_yaml: str = "audata_proof/model/model_config_RawNet.yaml"
-    path_to_model: str = "audata_proof/model/model.pth"
+    path_to_yaml: str = 'audata_proof/model/model_config_RawNet.yaml'
+    path_to_model: str = 'audata_proof/model/model.pth'
 
     # Terms explanation:
     # "staging" term is equivalent to "testnet"
@@ -25,9 +25,9 @@ class Settings(BaseSettings):
 
     DLP_ID: int = 1234
     USE_SEALING: str = '/sealed'
-    INPUT_DIR: str = '/input'
+    INPUT_DIR: str = 'demo/input'
     USER_EMAIL: str | None = None
-    OUTPUT_DIR: str = '/output'
+    OUTPUT_DIR: str = 'demo/output'
 
     # Database environment variables
 
