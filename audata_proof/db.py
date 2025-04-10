@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
 from audata_proof.config import settings
-from audata_proof.models.db import Base
+from audata_proof.schemas.db import Base
 
 
 class Database:

@@ -6,10 +6,12 @@ from hashlib import md5
 
 from acoustid import fingerprint_file
 from loguru import logger as console_logger
+import numpy as np
+import librosa
 
 from audata_proof.config import settings
 from audata_proof.db import Database, db
-from audata_proof.models.db import Contributions, Users
+from audata_proof.schemas.db import Contributions, Users
 
 
 def seed_db_with_fprints(amount: int):
@@ -105,3 +107,23 @@ def create_new_user(telegram_id: str, db: Database) -> None:
         session.add(new_user)
         session.commit()
     console_logger.info(f'New user with id {telegram_id} created')
+
+
+
+def pad(y, max_len=96000):
+    x_len = y.shape[0]
+    if x_len >= max_len:
+        return y[:max_len]
+
+    num_repeats = int(max_len / x_len) + 1
+    padded_x = np.tile(y, num_repeats)[:max_len]
+    return padded_x
+
+
+def process_audio(audio_path):
+    y, sr = librosa.load(audio_path, sr=None)
+
+    if sr != 24000:
+        y = librosa.resample(y, orig_sr=sr, target_sr=24000)
+
+    return y, sr

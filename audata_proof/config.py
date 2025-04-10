@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     from .env, fields without default values are mandatory.
     """
 
+    path_to_yaml: str = "audata_proof/model/model_config_RawNet.yaml"
+    path_to_model: str = "audata_proof/model/model.pth"
+
     # Terms explanation:
     # "staging" term is equivalent to "testnet"
     # "production" term is equivalent to "mainnet"

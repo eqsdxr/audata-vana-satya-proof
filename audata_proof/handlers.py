@@ -1,12 +1,17 @@
 from hashlib import md5
 from typing import Literal
 
+import numpy as np
+import torch
+import yaml
 from acoustid import compare_fingerprints, fingerprint_file
 from loguru import logger as console_logger
 
 from audata_proof.db import Database
-from audata_proof.models.db import Contributions, Users
-from audata_proof.utils import decode_db_fingerprint
+from audata_proof.schemas.db import Contributions, Users
+from audata_proof.utils import decode_db_fingerprint, pad, process_audio
+from audata_proof.config import settings
+from audata_proof.model.model import RawNet
 
 
 def check_uniqueness(
@@ -138,8 +143,51 @@ def check_ownership(telegram_id: str, db: Database) -> Literal[0, 1]:
 
 
 def check_authenticity(file_path: str) -> Literal[0, 1]:
-    """Work in progress..."""
-    return 0
+    with open(settings.path_to_yaml, "r") as f:
+        config = yaml.safe_load(f)
+
+    device = torch.device("cpu")
+
+    model = RawNet(config["model"], device=device)
+    model.load_state_dict(
+        torch.load(settings.path_to_model, map_location="cpu", weights_only=False)
+    )
+    model.eval()
+    model = model.to(device)
+
+    y, _ = process_audio(file_path)
+
+    segments = []
+    max_len = 96000
+    total_len = len(y)
+
+    if total_len <= max_len:
+        y_pad = pad(y, max_len)
+        segments.append(torch.tensor(y_pad, dtype=torch.float32))
+    else:
+        num_chunks = total_len // max_len
+        for i in range(num_chunks):
+            seg = y[i * max_len : (i + 1) * max_len]
+            segments.append(
+                torch.tensor(pad(seg, max_len), dtype=torch.float32)
+            )
+
+    model.eval()
+    probs = []
+    with torch.no_grad():
+        for segment in segments:
+            input_tensor = segment.unsqueeze(0).to(device)
+            output = model(input_tensor)
+            if isinstance(output, tuple):
+                output = output[0]
+            softmax_out = torch.softmax(output, dim=1)[0][1].item()
+            probs.append(softmax_out)
+
+    final_prob = float(np.mean(probs))
+    print("Likely Real" if final_prob > 0.5 else "Likely Fake")
+    print(f"Score: {final_prob}")
+    return 1 if final_prob > 0.5 else 0
+
 
 
 def check_quality(file_path: str) -> float:

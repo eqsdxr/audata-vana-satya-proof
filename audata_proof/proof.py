@@ -3,7 +3,7 @@ from loguru import logger as console_logger
 from audata_proof import handlers
 from audata_proof.config import settings
 from audata_proof.db import Database
-from audata_proof.models.proof_response import ProofResponse
+from audata_proof.schemas.proof_response import ProofResponse
 
 
 class Proof:
@@ -38,7 +38,7 @@ class Proof:
             self.file_path, self.db
         )
 
-        self.proof_response.quality = handlers.check_authenticity(
+        self.proof_response.authenticity= handlers.check_authenticity(
             self.file_path,
         )
 
