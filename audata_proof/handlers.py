@@ -41,9 +41,6 @@ def check_uniqueness(
     TypeError
         if type of fingerprints were incorrect while
         comparing.
-    MultipleResultsFound
-        If multiple fingerprints with the same hash exists
-        in the database.
     Exception
         If there is an unexpected error occured.
     """
