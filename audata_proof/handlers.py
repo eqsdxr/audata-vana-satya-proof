@@ -142,6 +142,6 @@ def check_authenticity(file_path: str) -> Literal[0, 1]:
     return 0
 
 
-def check_quality(file_path: str) -> int:
+def check_quality(file_path: str) -> float:
     """Work in progress..."""
-    return 0
+    return 0.0
